@@ -47,8 +47,14 @@ namespace mac_system_console_logger {
       juce::Logger::outputDebugString(tempDbgBuf);
 
       CFStringRef messageCFString = tempDbgBuf.toCFString();
-      NSLog(@"%@", (NSString *)messageCFString);
+      // Put plugin name in log message to seperate DAW messages from plugin messages
+      // JucePlugin_Name is defined as a macro via JUCE-created compile arguments
+      CFStringRef pluginNameCFString = CFStringCreateWithCString(NULL, JucePlugin_Name, kCFStringEncodingUTF8);
+
+      NSLog(@"%@: %@", (NSString *)pluginNameCFString, (NSString *)messageCFString);
+
       CFRelease(messageCFString);
+      CFRelease(pluginNameCFString);
   }
 }
 

@@ -1,7 +1,5 @@
 # MacSystemConsoleLogger4JUCE
-A small &amp; simple JUCE-module that inherits from juce::Logger and redirects Log messages to NSLog. This will make them appear in the OS X Console.app
 
+A small &amp; simple JUCE-module that redefines the JUCE [DBG macro](https://docs.juce.com/master/group__juce__core-system.html#ga679635952a5d2eb25f3b31398f0fcc25) to also output to the built in macOS application _Console.app_.
 
-To use it just add a private `MacSystemConsoleLogger macSystemConsoleLogger;` to your JUCEApplication class and add the line `Logger::setCurrentLogger (&macSystemConsoleLogger);` to the constructor. Now `Logger::writeToLog ("foo")` will result in an output of that string to the OS X Log that might be viewed through your system's Console.app and to the XCode console while running in the IDE. For fallback compatibility, it will invoke an output to stderr on all other platforms.
-
-On destruction, the instance will check if it's still the current Logger. If that's true, it will automatically reassign a nullptr to the current Logger so that it falls back into it's default state. If you changed to another logger during the MacSystemConsoleLogger's lifetime, nothing will happen.
+This repository is a forked from [JanosGit](https://github.com/JanosGit/MacSystemConsoleLogger4JUCE). JanosGit's original MacSystemConsoleLogger4JUCE method was to create a class that inherits from juce::Logger and redirects Log messages to NSLog. JanosGit's method required managing a object instance, and was recommended set [Logger::setCurrentLogger](https://docs.juce.com/master/classLogger.html#a5855a0341fc4f6ceb5418879fd685277) to the MacSystemConsoleLogger4JUCE logger. This method presented here does not require the user to do any object allocation, and instead use the `DBG()` macro as normally intended to debug.
