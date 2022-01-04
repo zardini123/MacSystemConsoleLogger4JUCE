@@ -26,7 +26,7 @@ SOFTWARE.
   ==============================================================================
 
   BEGIN_JUCE_MODULE_DECLARATION
- 
+
   ID:            mac_system_console_logger
   vendor:        Janos Buttgereit
   version:       1.0.0
@@ -37,7 +37,7 @@ SOFTWARE.
   license:       MIT
 
   END_JUCE_MODULE_DECLARATION
- 
+
  ==============================================================================
  */
 
@@ -45,19 +45,13 @@ SOFTWARE.
 
 #include <juce_core/juce_core.h>
 
-/** 
- * If this logger is set active, all Logger::writeToLog 
- * calls will result in an output to the OS X log. 
- */
-class MacSystemConsoleLogger : public juce::Logger {
-    
-public:
-    
-    /**
-     * The destructor will automatically reset the current logger to default if
-     * this one is still assigned as the current logger.
-     */
-    ~MacSystemConsoleLogger();
+#if (defined(JUCE_DEBUG) && !defined(JUCE_DISABLE_ASSERTIONS)) && (defined(JUCE_MAC) || defined(JUCE_IOS))
 
-    void logMessage (const juce::String &message) override;
-};
+namespace mac_system_console_logger {
+  void mac_system_console_logger(const juce::String &message);
+}
+
+#undef DBG
+#define DBG(textToWrite) JUCE_BLOCK_WITH_FORCED_SEMICOLON ( mac_system_console_logger::mac_system_console_logger(textToWrite); )
+
+#endif

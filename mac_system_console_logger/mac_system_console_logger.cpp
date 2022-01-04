@@ -24,27 +24,32 @@ SOFTWARE.
 
 #include "mac_system_console_logger.h"
 
-#if defined(JUCE_MAC) || defined(JUCE_IOS)
+#if (defined(JUCE_DEBUG) && !defined(JUCE_DISABLE_ASSERTIONS)) && (defined(JUCE_MAC) || defined(JUCE_IOS))
+
+// macOS specific code must be done in a .mm file, which in turn will be
+//    compiled by macOS specific stuff.
+// Including (importing) Foundation/Foundation.h outside a .mm file results in
+//    some insane compile errors regarding multiple defintions, where types from
+//    Foundation and JUCE intersect.
+// Therefore the workaround is to use a function header in the DBG macro,
+//    and the function body becomes defined once this .mm file is compiled.
+// The DBG macro is re-defined in the header file as the macro needs to be
+//    included immediately before it is used in code.
+//    The macro definition cannot be deffered as for some reason defining a
+//    macro in a .mm file does not transfer to the user code.
+// Note, JUCE in juce_BasicNativeHeaders.h also does #import instead of #include
 #import <Foundation/Foundation.h>
 
-void MacSystemConsoleLogger::logMessage(const juce::String &message) {
-    
-    // it's that easy... ;)
-    CFStringRef messageCFString = message.toCFString();
-    NSLog (@"%@", (NSString*)messageCFString);
-    CFRelease (messageCFString);
-}
-#else
+namespace mac_system_console_logger {
+  void mac_system_console_logger(const juce::String &message) {
+      juce::String tempDbgBuf;
+      tempDbgBuf << message;
+      juce::Logger::outputDebugString(tempDbgBuf);
 
-/** Just a fallback if this is included on non-apple systems. */
-void MacSystemConsoleLogger::logMessage(const juce::String &message) {
-
-    std::cerr << message << std::endl;
+      CFStringRef messageCFString = tempDbgBuf.toCFString();
+      NSLog(@"%@", (NSString *)messageCFString);
+      CFRelease(messageCFString);
+  }
 }
+
 #endif
-
-MacSystemConsoleLogger::~MacSystemConsoleLogger() {
-    if (Logger::getCurrentLogger() == this) {
-        Logger::setCurrentLogger (nullptr);
-    }
-}
